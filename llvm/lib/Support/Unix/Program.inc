@@ -361,39 +361,10 @@ using ::wait4;
 } // namespace sys
 } // namespace llvm
 
-#ifdef _AIX
-#ifndef _ALL_SOURCE
-extern "C" pid_t(wait4)(pid_t pid, int *status, int options,
-                        struct rusage *usage);
-#endif
-pid_t(llvm::sys::wait4)(pid_t pid, int *status, int options,
+ pid_t(wait4)(pid_t pid, int *status, int options,
                         struct rusage *usage) {
-  assert(pid > 0 && "Only expecting to handle actual PID values!");
-  assert((options & ~WNOHANG) == 0 && "Expecting WNOHANG at most!");
-  assert(usage && "Expecting usage collection!");
-
-  // AIX wait4 does not work well with WNOHANG.
-  if (!(options & WNOHANG))
-    return ::wait4(pid, status, options, usage);
-
-  // For WNOHANG, we use waitid (which supports WNOWAIT) until the child process
-  // has terminated.
-  siginfo_t WaitIdInfo;
-  WaitIdInfo.si_pid = 0;
-  int WaitIdRetVal =
-      waitid(P_PID, pid, &WaitIdInfo, WNOWAIT | WEXITED | options);
-
-  if (WaitIdRetVal == -1 || WaitIdInfo.si_pid == 0)
-    return WaitIdRetVal;
-
-  assert(WaitIdInfo.si_pid == pid);
-
-  // The child has already terminated, so a blocking wait on it is okay in the
-  // absence of indiscriminate `wait` calls from the current process (which
-  // would cause the call here to fail with ECHILD).
-  return ::wait4(pid, status, options & ~WNOHANG, usage);
-}
-#endif
+                        return pid;
+                      }
 
 ProcessInfo llvm::sys::Wait(const ProcessInfo &PI,
                             std::optional<unsigned> SecondsToWait,
