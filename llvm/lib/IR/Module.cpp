@@ -893,20 +893,44 @@ void Module::setDarwinTargetVariantSDKVersion(VersionTuple Version) {
   addSDKVersionMD(Version, *this, "darwin.target_variant.SDK Version");
 }
 
-nlohmann::json toJson(int i) { return nlohmann::json::object({{"a", i}}); }
+nlohmann::json toJson(GlobalValue &Value) {
+  nlohmann::json::object_t Obj = nlohmann::json::object();
+  Obj["Linkage"] = Value.getLinkage();
+  Obj["Visibility"] = Value.getVisibility();
+  // Onj["UnnamedAddr"] = Value.getUnnamedAddr(); // TODO
+  // Obj["DllStorageClass"] = Value.getDllStorageClass(); // TODO
+  Obj["ThreadLocalMode"] = Value.getThreadLocalMode(); // TODO
+  Obj["AddressSpace"] = Value.getAddressSpace();
+  // TODO: remaining fields
+  return Obj;
+}
 
-nlohmann::json toJson(GlobalAlias &GlobalAlias) {
-  return nlohmann::json::object();
+nlohmann::json toJson(GlobalVariable &Global) {
+  nlohmann::json::object_t Obj = toJson((GlobalValue &)Global);
+  return Obj;
+}
+
+nlohmann::json toJson(Function &Function) {
+  nlohmann::json::object_t Obj = toJson((GlobalValue &)Function);
+  return Obj;
+}
+
+nlohmann::json toJson(GlobalAlias &Alias) {
+  nlohmann::json::object_t Obj = toJson((GlobalValue &)Alias);
+  return Obj;
+}
+
+nlohmann::json toJson(GlobalIFunc &IFunc) {
+  nlohmann::json::object_t Obj = toJson((GlobalValue &)IFunc);
+  return Obj;
 }
 
 template <typename T>
-nlohmann::json symbolTableToJson(SymbolTableList<T> &AliasList) {
+nlohmann::json symbolTableToJson(SymbolTableList<T> &List) {
   nlohmann::json::array_t Arr = nlohmann::json::array();
 
-  for (T &AliasPair : AliasList) {
-    // for (const GlobalAlias *GA : AliasPair.second)
-    //   OutStreamer->emitLabel(getSymbol(GA));
-    Arr.push_back(toJson(4));
+  for (T &Elem : List) {
+    Arr.push_back(toJson(Elem));
   }
 
   return Arr;
@@ -914,9 +938,11 @@ nlohmann::json symbolTableToJson(SymbolTableList<T> &AliasList) {
 
 nlohmann::json Module::json() {
   nlohmann::json Mod = nlohmann::json::object();
+
   Mod["GlobalList"] = symbolTableToJson(this->GlobalList);
   Mod["FunctionList"] = symbolTableToJson(this->FunctionList);
   Mod["AliasList"] = symbolTableToJson(this->AliasList);
   Mod["IFuncList"] = symbolTableToJson(this->IFuncList);
+
   return Mod;
 }
