@@ -153,7 +153,7 @@ struct VerifierSupport {
 
 private:
   void Write(const Module *M) {
-    *OS << "; ModuleID = '" << M->getModuleIdentifier() << "'\n";
+    *OS << "; ModuleID NOTICE ME SENPAI = '" << M->getModuleIdentifier() << "'\n";
   }
 
   void Write(const Value *V) {

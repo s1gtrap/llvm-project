@@ -149,7 +149,7 @@ FunctionCallee Module::getOrInsertFunction(StringRef Name, FunctionType *Ty,
     // Nope, add it
     Function *New = Function::Create(Ty, GlobalVariable::ExternalLinkage,
                                      DL.getProgramAddressSpace(), Name);
-    if (!New->isIntrinsic())       // Intrinsics get attrs set on construction
+    if (!New->isIntrinsic()) // Intrinsics get attrs set on construction
       New->setAttributes(AttributeList);
     FunctionList.push_back(New);
     return {Ty, New}; // Return the new prototype.
@@ -190,7 +190,7 @@ Function *Module::getFunction(StringRef Name) const {
 GlobalVariable *Module::getGlobalVariable(StringRef Name,
                                           bool AllowLocal) const {
   if (GlobalVariable *Result =
-      dyn_cast_or_null<GlobalVariable>(getNamedValue(Name)))
+          dyn_cast_or_null<GlobalVariable>(getNamedValue(Name)))
     if (AllowLocal || !Result->hasLocalLinkage())
       return Result;
   return nullptr;
@@ -300,10 +300,11 @@ bool Module::isValidModuleFlag(const MDNode &ModFlag, ModFlagBehavior &MFB,
 }
 
 /// getModuleFlagsMetadata - Returns the module flags in the provided vector.
-void Module::
-getModuleFlagsMetadata(SmallVectorImpl<ModuleFlagEntry> &Flags) const {
+void Module::getModuleFlagsMetadata(
+    SmallVectorImpl<ModuleFlagEntry> &Flags) const {
   const NamedMDNode *ModFlags = getModuleFlagsMetadata();
-  if (!ModFlags) return;
+  if (!ModFlags)
+    return;
 
   for (const MDNode *Flag : ModFlags->operands()) {
     ModFlagBehavior MFB;
@@ -389,9 +390,7 @@ void Module::setModuleFlag(ModFlagBehavior Behavior, StringRef Key,
   addModuleFlag(Behavior, Key, Val);
 }
 
-void Module::setDataLayout(StringRef Desc) {
-  DL.reset(Desc);
-}
+void Module::setDataLayout(StringRef Desc) { DL.reset(Desc); }
 
 void Module::setDataLayout(const DataLayout &Other) { DL = Other; }
 
@@ -868,4 +867,13 @@ VersionTuple Module::getDarwinTargetVariantSDKVersion() const {
 
 void Module::setDarwinTargetVariantSDKVersion(VersionTuple Version) {
   addSDKVersionMD(Version, *this, "darwin.target_variant.SDK Version");
+}
+
+nlohmann::json Module::json() {
+  nlohmann::json Mod = nlohmann::json::object();
+  Mod["GlobalList"] = nlohmann::json::array({});
+  Mod["FunctionList"] = nlohmann::json::array({});
+  Mod["AliasList"] = nlohmann::json::array({});
+  Mod["IFuncList"] = nlohmann::json::array({});
+  return Mod;
 }
