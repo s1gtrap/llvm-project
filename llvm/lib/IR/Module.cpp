@@ -893,11 +893,18 @@ void Module::setDarwinTargetVariantSDKVersion(VersionTuple Version) {
   addSDKVersionMD(Version, *this, "darwin.target_variant.SDK Version");
 }
 
+template <typename T>
+nlohmann::json symbolTableToJson(SymbolTableList<T> &List) {
+  nlohmann::json::array_t Arr = nlohmann::json::array();
+  Arr.push_back(nlohmann::json::object());
+  return Arr;
+}
+
 nlohmann::json Module::json() {
   nlohmann::json Mod = nlohmann::json::object();
   Mod["GlobalList"] = nlohmann::json::array({});
   Mod["FunctionList"] = nlohmann::json::array({});
-  Mod["AliasList"] = nlohmann::json::array({});
+  Mod["AliasList"] = symbolTableToJson(this->AliasList);
   Mod["IFuncList"] = nlohmann::json::array({});
   return Mod;
 }
