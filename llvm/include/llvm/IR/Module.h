@@ -14,6 +14,8 @@
 #ifndef LLVM_IR_MODULE_H
 #define LLVM_IR_MODULE_H
 
+#include <nlohmann/json.hpp>
+
 #include "llvm-c/Types.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/StringMap.h"
@@ -1062,6 +1064,8 @@ public:
 
   /// Set the target variant version build SDK version metadata.
   void setDarwinTargetVariantSDKVersion(VersionTuple Version);
+
+  nlohmann::json json() ;
 };
 
 /// Given "llvm.used" or "llvm.compiler.used" as a global name, collect the
