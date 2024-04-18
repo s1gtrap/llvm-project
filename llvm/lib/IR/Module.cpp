@@ -870,9 +870,15 @@ void Module::setDarwinTargetVariantSDKVersion(VersionTuple Version) {
 }
 
 template <typename T>
-nlohmann::json symbolTableToJson(SymbolTableList<T> &List) {
+nlohmann::json symbolTableToJson(SymbolTableList<T> &AliasList) {
   nlohmann::json::array_t Arr = nlohmann::json::array();
-  Arr.push_back(nlohmann::json::object());
+
+  for (auto &AliasPair : AliasList) {
+    // for (const GlobalAlias *GA : AliasPair.second)
+    //   OutStreamer->emitLabel(getSymbol(GA));
+    Arr.push_back(nlohmann::json::object());
+  }
+
   return Arr;
 }
 
