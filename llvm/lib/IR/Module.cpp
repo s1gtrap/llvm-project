@@ -915,7 +915,8 @@ nlohmann::json toJson(GlobalVariable &Global) {
 
 nlohmann::json toJson(Function &Function) {
   nlohmann::json::object_t Obj = toJson((GlobalValue &)Function);
-  Obj["BasicBlock"] = symbolTableToJson(Function.getBasicBlockList()); //
+  Obj["BasicBlock"] = symbolTableToJson(
+      Function.getBasicBlockList()); // FIXME: use iterator/successors instead
   return Obj;
 }
 
@@ -929,8 +930,20 @@ nlohmann::json toJson(GlobalIFunc &IFunc) {
   return Obj;
 }
 
+nlohmann::json toJson(Instruction &Term) {
+  nlohmann::json::object_t Obj = nlohmann::json::object();
+  Obj["Opcode"] = Term.getOpcode();
+  Obj["OpcodeName"] = Term.getOpcodeName();
+  return Obj;
+}
+
 nlohmann::json toJson(BasicBlock &Block) {
   nlohmann::json::object_t Obj = nlohmann::json::object();
+  Obj["Instructions"] = nlohmann::json::array();
+  for (auto Inst = Block.begin(); Inst != Block.end(); Inst++) {
+    Obj["Instructions"].push_back(toJson(*Inst));
+  }
+  Obj["Terminator"] = toJson(*Block.getTerminator()); //
   return Obj;
 }
 
