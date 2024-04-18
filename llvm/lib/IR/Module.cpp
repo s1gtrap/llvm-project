@@ -881,6 +881,9 @@ nlohmann::json toJson(GlobalValue &Value) {
   return Obj;
 }
 
+template <typename T>
+nlohmann::json symbolTableToJson(SymbolTableList<T> &List);
+
 nlohmann::json toJson(GlobalVariable &Global) {
   nlohmann::json::object_t Obj = toJson((GlobalValue &)Global);
   return Obj;
@@ -888,6 +891,7 @@ nlohmann::json toJson(GlobalVariable &Global) {
 
 nlohmann::json toJson(Function &Function) {
   nlohmann::json::object_t Obj = toJson((GlobalValue &)Function);
+  Obj["BasicBlock"] = symbolTableToJson(Function.getBasicBlockList()); //
   return Obj;
 }
 
@@ -898,6 +902,11 @@ nlohmann::json toJson(GlobalAlias &Alias) {
 
 nlohmann::json toJson(GlobalIFunc &IFunc) {
   nlohmann::json::object_t Obj = toJson((GlobalValue &)IFunc);
+  return Obj;
+}
+
+nlohmann::json toJson(BasicBlock &Block) {
+  nlohmann::json::object_t Obj = nlohmann::json::object();
   return Obj;
 }
 
