@@ -893,12 +893,16 @@ void Module::setDarwinTargetVariantSDKVersion(VersionTuple Version) {
   addSDKVersionMD(Version, *this, "darwin.target_variant.SDK Version");
 }
 
+nlohmann::json toJson(Type &Type);
+
 nlohmann::json toJson(GlobalValue &Value) {
   nlohmann::json::object_t Obj = nlohmann::json::object();
   Obj["Linkage"] = Value.getLinkage();
   Obj["Visibility"] = Value.getVisibility();
   // Onj["UnnamedAddr"] = Value.getUnnamedAddr(); // TODO
   // Obj["DllStorageClass"] = Value.getDllStorageClass(); // TODO
+  Obj["PointerType"] = toJson(*((Type *)Value.getType()));
+  Obj["ValueType"] = toJson(*Value.getValueType());
   Obj["ThreadLocalMode"] = Value.getThreadLocalMode(); // TODO
   Obj["AddressSpace"] = Value.getAddressSpace();
   // TODO: remaining fields
@@ -938,6 +942,9 @@ nlohmann::json toJson(Type &Type) {
   for (auto Subtype = Type.subtype_begin(); Subtype != Type.subtype_end();
        Subtype++) {
     Obj["Subtypes"].push_back(toJson(**Subtype));
+  }
+  if (Type.isArrayTy()) {
+    Obj["NumElements"] = Type.getArrayNumElements();
   }
   return Obj;
 }
