@@ -893,14 +893,20 @@ void Module::setDarwinTargetVariantSDKVersion(VersionTuple Version) {
   addSDKVersionMD(Version, *this, "darwin.target_variant.SDK Version");
 }
 
+nlohmann::json toJson(int i) { return nlohmann::json::object({{"a", i}}); }
+
+nlohmann::json toJson(GlobalAlias &GlobalAlias) {
+  return nlohmann::json::object();
+}
+
 template <typename T>
 nlohmann::json symbolTableToJson(SymbolTableList<T> &AliasList) {
   nlohmann::json::array_t Arr = nlohmann::json::array();
 
-  for (auto &AliasPair : AliasList) {
+  for (T &AliasPair : AliasList) {
     // for (const GlobalAlias *GA : AliasPair.second)
     //   OutStreamer->emitLabel(getSymbol(GA));
-    Arr.push_back(nlohmann::json::object());
+    Arr.push_back(toJson(4));
   }
 
   return Arr;
@@ -908,9 +914,9 @@ nlohmann::json symbolTableToJson(SymbolTableList<T> &AliasList) {
 
 nlohmann::json Module::json() {
   nlohmann::json Mod = nlohmann::json::object();
-  Mod["GlobalList"] = nlohmann::json::array({});
-  Mod["FunctionList"] = nlohmann::json::array({});
+  Mod["GlobalList"] = symbolTableToJson(this->GlobalList);
+  Mod["FunctionList"] = symbolTableToJson(this->FunctionList);
   Mod["AliasList"] = symbolTableToJson(this->AliasList);
-  Mod["IFuncList"] = nlohmann::json::array({});
+  Mod["IFuncList"] = symbolTableToJson(this->IFuncList);
   return Mod;
 }
