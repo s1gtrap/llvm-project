@@ -906,10 +906,32 @@ nlohmann::json toJson(GlobalIFunc &IFunc) {
   return Obj;
 }
 
+nlohmann::json toJson(Type &Type) {
+  auto Obj = nlohmann::json::object();
+  Obj["ID"] = Type.getTypeID();
+  Obj["Subtypes"] = nlohmann::json::array();
+  // Obj["SubtypesLength"] = Type.subtypes().size(); // FIXME: what is this?
+  for (auto Subtype = Type.subtype_begin(); Subtype != Type.subtype_end();
+       Subtype++) {
+    Obj["Subtypes"].push_back(toJson(**Subtype));
+  }
+  return Obj;
+}
+
+nlohmann::json toJson(Value &Value) {
+  auto Obj = nlohmann::json::object();
+  Obj["Type"] = toJson(*Value.getType());
+  return Obj;
+}
+
 nlohmann::json toJson(Instruction &Term) {
   nlohmann::json::object_t Obj = nlohmann::json::object();
   Obj["Opcode"] = Term.getOpcode();
   Obj["OpcodeName"] = Term.getOpcodeName();
+  Obj["Operands"] = nlohmann::json::array();
+  for (unsigned int i = 0; i < Term.getNumOperands(); i++) {
+    Obj["Operands"].push_back(toJson(*Term.getOperandList()[i].get()));
+  }
   return Obj;
 }
 
