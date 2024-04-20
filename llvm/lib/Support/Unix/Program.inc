@@ -373,8 +373,6 @@ pid_t(llvm::sys::wait4)(pid_t pid, int *status, int options,
   assert(usage && "Expecting usage collection!");
 
   // AIX wait4 does not work well with WNOHANG.
-  if (!(options & WNOHANG))
-    return ::wait4(pid, status, options, usage);
 
   // For WNOHANG, we use waitid (which supports WNOWAIT) until the child process
   // has terminated.
@@ -391,7 +389,7 @@ pid_t(llvm::sys::wait4)(pid_t pid, int *status, int options,
   // The child has already terminated, so a blocking wait on it is okay in the
   // absence of indiscriminate `wait` calls from the current process (which
   // would cause the call here to fail with ECHILD).
-  return ::wait4(pid, status, options & ~WNOHANG, usage);
+  return pid;
 }
 #endif
 
@@ -432,7 +430,7 @@ ProcessInfo llvm::sys::Wait(const ProcessInfo &PI,
     ProcStat->reset();
 
   do {
-    WaitResult.Pid = sys::wait4(ChildPid, &status, WaitPidOptions, &Info);
+    WaitResult.Pid = ChildPid;
   } while (WaitUntilTerminates && WaitResult.Pid == -1 && errno == EINTR);
 #endif
 
