@@ -129,7 +129,7 @@ if( LLVM_ENABLE_PROJECTS STREQUAL "all" )
 endif()
 foreach(proj ${LLVM_ENABLE_PROJECTS})
   if (NOT proj STREQUAL "llvm" AND NOT "${proj}" IN_LIST LLVM_KNOWN_PROJECTS)
-     MESSAGE(FATAL_ERROR "${proj} isn't a known project: ${LLVM_KNOWN_PROJECTS}. Did you mean to enable it as a runtime in LLVM_ENABLE_RUNTIMES?")
+    MESSAGE(FATAL_ERROR "${proj} isn't a known project: ${LLVM_KNOWN_PROJECTS}. Did you mean to enable it as a runtime in LLVM_ENABLE_RUNTIMES?")
   endif()
 endforeach()
 
@@ -902,7 +902,7 @@ endif()
 
 include(HandleLLVMOptions)
 
-######
+# # # # # #
 
 # Configure all of the various header file fragments LLVM uses which depend on
 # configuration variables.
@@ -1074,8 +1074,8 @@ endif()
 # Build with _XOPEN_SOURCE on AIX, as stray macros in _ALL_SOURCE mode tend to
 # break things. In this case we need to enable the large-file API as well.
 if (UNIX AND ${CMAKE_SYSTEM_NAME} MATCHES "AIX")
-          add_compile_definitions(_XOPEN_SOURCE=700)
-          add_compile_definitions(_LARGE_FILE_API)
+  add_compile_definitions(_XOPEN_SOURCE=700)
+  add_compile_definitions(_LARGE_FILE_API)
 
   # Modules should be built with -shared -Wl,-G, so we can use runtime linking
   # with plugins.
@@ -1094,12 +1094,12 @@ endif()
 
 # Build with _FILE_OFFSET_BITS=64 on Solaris to match g++ >= 9.
 if (UNIX AND ${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
-          add_compile_definitions(_FILE_OFFSET_BITS=64)
+  add_compile_definitions(_FILE_OFFSET_BITS=64)
 endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-include_directories( ${LLVM_INCLUDE_DIR} ${LLVM_MAIN_INCLUDE_DIR})
+include_directories( ${LLVM_INCLUDE_DIR} ${LLVM_MAIN_INCLUDE_DIR} /usr/local/include )
 
 # when crosscompiling import the executable targets from a file
 if(LLVM_USE_HOST_TOOLS)
@@ -1107,13 +1107,13 @@ if(LLVM_USE_HOST_TOOLS)
   llvm_create_cross_target(LLVM NATIVE "" Release)
 endif(LLVM_USE_HOST_TOOLS)
 if(LLVM_TARGET_IS_CROSSCOMPILE_HOST)
-# Dummy use to avoid CMake Warning: Manually-specified variables were not used
-# (this is a variable that CrossCompile sets on recursive invocations)
+  # Dummy use to avoid CMake Warning: Manually-specified variables were not used
+  # (this is a variable that CrossCompile sets on recursive invocations)
 endif()
 
 if( ${CMAKE_SYSTEM_NAME} MATCHES SunOS )
-   # special hack for Solaris to handle crazy system sys/regset.h
-   include_directories("${LLVM_MAIN_INCLUDE_DIR}/llvm/Support/Solaris")
+  # special hack for Solaris to handle crazy system sys/regset.h
+  include_directories("${LLVM_MAIN_INCLUDE_DIR}/llvm/Support/Solaris")
 endif( ${CMAKE_SYSTEM_NAME} MATCHES SunOS )
 
 # Make sure we don't get -rdynamic in every binary. For those that need it,
@@ -1185,9 +1185,6 @@ if( LLVM_INCLUDE_RUNTIMES )
   add_subdirectory(runtimes)
 endif()
 
-if( LLVM_INCLUDE_EXAMPLES )
-  add_subdirectory(examples)
-endif()
 
 if( LLVM_INCLUDE_TESTS )
   if(EXISTS ${LLVM_MAIN_SRC_DIR}/projects/test-suite AND TARGET clang)
@@ -1329,6 +1326,3 @@ if (LLVM_INCLUDE_BENCHMARKS)
   add_subdirectory(benchmarks)
 endif()
 
-if (LLVM_INCLUDE_UTILS AND LLVM_INCLUDE_TOOLS)
-  add_subdirectory(utils/llvm-locstats)
-endif()
