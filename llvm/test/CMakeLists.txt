@@ -55,25 +55,6 @@ configure_lit_site_cfg(
 # Set the depends list as a variable so that it can grow conditionally.
 # NOTE: Sync the substitutions in test/lit.cfg when adding to this list.
 set(LLVM_TEST_DEPENDS
-          BugpointPasses
-          FileCheck
-          LLVMHello
-          LLVMWindowsDriver
-          UnitTests
-          bugpoint
-          count
-          llc
-          lli
-          lli-child-target
-          not
-          obj2yaml
-          opt
-          sancov
-          sanstats
-          split-file
-          verify-uselistorder
-          yaml-bench
-          yaml2obj
         )
 
 if(TARGET llvm-lto)
