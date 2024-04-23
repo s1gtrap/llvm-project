@@ -15,17 +15,14 @@
 //===----------------------------------------------------------------------===//
 
 #include "llvm/AsmParser/Parser.h"
-#include "llvm/Bitcode/BitcodeWriter.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/ModuleSummaryIndex.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/Support/CommandLine.h"
-#include "llvm/Support/FileSystem.h"
 #include "llvm/Support/InitLLVM.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/SystemUtils.h"
-#include "llvm/Support/ToolOutputFile.h"
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <optional>
@@ -51,69 +48,16 @@ static cl::opt<bool> DisableOutput("disable-output", cl::desc("Disable output"),
 static cl::opt<bool> EmitModuleHash("module-hash", cl::desc("Emit module hash"),
                                     cl::init(false), cl::cat(AsCat));
 
-static cl::opt<bool> DumpAsm("d", cl::desc("Print assembly as parsed"),
-                             cl::Hidden, cl::cat(AsCat));
-
 static cl::opt<bool>
     DisableVerify("disable-verify", cl::Hidden,
                   cl::desc("Do not run verifier on input LLVM (dangerous!)"),
                   cl::cat(AsCat));
-
-static cl::opt<bool> PreserveBitcodeUseListOrder(
-    "preserve-bc-uselistorder",
-    cl::desc("Preserve use-list order when writing LLVM bitcode."),
-    cl::init(true), cl::Hidden, cl::cat(AsCat));
 
 static cl::opt<std::string> ClDataLayout("data-layout",
                                          cl::desc("data layout string to use"),
                                          cl::value_desc("layout-string"),
                                          cl::init(""), cl::cat(AsCat));
 extern bool WriteNewDbgInfoFormatToBitcode;
-
-static void WriteOutputFile(const Module *M, const ModuleSummaryIndex *Index) {
-  // Infer the output filename if needed.
-  if (OutputFilename.empty()) {
-    if (InputFilename == "-") {
-      OutputFilename = "-";
-    } else {
-      StringRef IFN = InputFilename;
-      OutputFilename = (IFN.ends_with(".ll") ? IFN.drop_back(3) : IFN).str();
-      OutputFilename += ".bc";
-    }
-  }
-
-  std::error_code EC;
-  std::unique_ptr<ToolOutputFile> Out(
-      new ToolOutputFile(OutputFilename, EC, sys::fs::OF_None));
-  if (EC) {
-    errs() << EC.message() << '\n';
-    exit(1);
-  }
-
-  if (Force || !CheckBitcodeOutputToConsole(Out->os())) {
-    const ModuleSummaryIndex *IndexToWrite = nullptr;
-    // Don't attempt to write a summary index unless it contains any entries or
-    // has non-zero flags. The latter is used to assemble dummy index files for
-    // skipping modules by distributed ThinLTO backends. Otherwise we get an
-    // empty summary section.
-    if (Index && (Index->begin() != Index->end() || Index->getFlags()))
-      IndexToWrite = Index;
-    if (!IndexToWrite || (M && (!M->empty() || !M->global_empty())))
-      // If we have a non-empty Module, then we write the Module plus
-      // any non-null Index along with it as a per-module Index.
-      // If both are empty, this will give an empty module block, which is
-      // the expected behavior.
-      WriteBitcodeToFile(*M, Out->os(), PreserveBitcodeUseListOrder,
-                         IndexToWrite, EmitModuleHash);
-    else
-      // Otherwise, with an empty Module but non-empty Index, we write a
-      // combined index.
-      writeIndexToFile(*IndexToWrite, Out->os());
-  }
-
-  // Declare success.
-  Out->keep();
-}
 
 int main(int argc, char **argv) {
   InitLLVM X(argc, argv);
@@ -156,11 +100,9 @@ int main(int argc, char **argv) {
     // TODO: Implement and call summary index verifier.
   }
 
-  if (DumpAsm) {
-    errs() << M.get()->json().dump(2) << "\n";
-    if (Index.get() && Index->begin() != Index->end())
-      Index->print(errs());
-  }
+  errs() << M.get()->json().dump(2) << "\n";
+  if (Index.get() && Index->begin() != Index->end())
+    Index->print(errs());
 
   // if (!DisableOutput)
   //   WriteOutputFile(M.get(), Index.get());
