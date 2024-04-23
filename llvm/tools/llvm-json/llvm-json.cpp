@@ -27,8 +27,8 @@
 #include "llvm/Support/SystemUtils.h"
 #include "llvm/Support/ToolOutputFile.h"
 #include <memory>
-#include <optional>
 #include <nlohmann/json.hpp>
+#include <optional>
 using namespace llvm;
 
 cl::OptionCategory AsCat("llvm-json Options");
@@ -94,8 +94,8 @@ static void WriteOutputFile(const Module *M, const ModuleSummaryIndex *Index) {
     const ModuleSummaryIndex *IndexToWrite = nullptr;
     // Don't attempt to write a summary index unless it contains any entries or
     // has non-zero flags. The latter is used to assemble dummy index files for
-    // skipping modules by distributed ThinLTO backends. Otherwise we get an empty
-    // summary section.
+    // skipping modules by distributed ThinLTO backends. Otherwise we get an
+    // empty summary section.
     if (Index && (Index->begin() != Index->end() || Index->getFlags()))
       IndexToWrite = Index;
     if (!IndexToWrite || (M && (!M->empty() || !M->global_empty())))
@@ -141,11 +141,6 @@ int main(int argc, char **argv) {
     Err.print(argv[0], errs());
     return 1;
   }
-
-  // Convert to new debug format if requested.
-  assert(!M->IsNewDbgInfoFormat && "Unexpectedly in new debug mode");
-  if (UseNewDbgInfoFormat && WriteNewDbgInfoFormatToBitcode)
-    M->convertToNewDbgValues();
 
   std::unique_ptr<ModuleSummaryIndex> Index = std::move(ModuleAndIndex.Index);
 
