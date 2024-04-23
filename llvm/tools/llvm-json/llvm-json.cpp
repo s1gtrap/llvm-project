@@ -48,15 +48,6 @@ static cl::opt<bool> DisableOutput("disable-output", cl::desc("Disable output"),
 static cl::opt<bool> EmitModuleHash("module-hash", cl::desc("Emit module hash"),
                                     cl::init(false), cl::cat(AsCat));
 
-static cl::opt<bool>
-    DisableVerify("disable-verify", cl::Hidden,
-                  cl::desc("Do not run verifier on input LLVM (dangerous!)"),
-                  cl::cat(AsCat));
-
-static cl::opt<std::string> ClDataLayout("data-layout",
-                                         cl::desc("data layout string to use"),
-                                         cl::value_desc("layout-string"),
-                                         cl::init(""), cl::cat(AsCat));
 extern bool WriteNewDbgInfoFormatToBitcode;
 
 int main(int argc, char **argv) {
@@ -68,18 +59,11 @@ int main(int argc, char **argv) {
   // Parse the file now...
   SMDiagnostic Err;
   auto SetDataLayout = [](StringRef, StringRef) -> std::optional<std::string> {
-    if (ClDataLayout.empty())
-      return std::nullopt;
-    return ClDataLayout;
+    return std::nullopt;
   };
   ParsedModuleAndIndex ModuleAndIndex;
-  if (DisableVerify) {
-    ModuleAndIndex = parseAssemblyFileWithIndexNoUpgradeDebugInfo(
-        InputFilename, Err, Context, nullptr, SetDataLayout);
-  } else {
-    ModuleAndIndex = parseAssemblyFileWithIndex(InputFilename, Err, Context,
-                                                nullptr, SetDataLayout);
-  }
+  ModuleAndIndex = parseAssemblyFileWithIndex(InputFilename, Err, Context,
+                                              nullptr, SetDataLayout);
   std::unique_ptr<Module> M = std::move(ModuleAndIndex.Mod);
   if (!M.get()) {
     Err.print(argv[0], errs());
@@ -87,18 +71,6 @@ int main(int argc, char **argv) {
   }
 
   std::unique_ptr<ModuleSummaryIndex> Index = std::move(ModuleAndIndex.Index);
-
-  if (!DisableVerify) {
-    std::string ErrorStr;
-    raw_string_ostream OS(ErrorStr);
-    if (verifyModule(*M.get(), &OS)) {
-      errs() << argv[0]
-             << ": assembly parsed, but does not verify as correct!\n";
-      errs() << OS.str();
-      return 1;
-    }
-    // TODO: Implement and call summary index verifier.
-  }
 
   errs() << M.get()->json().dump(2) << "\n";
   if (Index.get() && Index->begin() != Index->end())
