@@ -4,14 +4,25 @@
 #include "llvm/IR/ModuleSummaryIndex.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/SystemUtils.h"
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <optional>
 using namespace llvm;
 
+extern "C" LLVMMemoryBufferRef LLVMCreateMemoryBufferWithMemoryRange(
+    const char *InputData, size_t InputDataLength, const char *BufferName,
+    LLVMBool RequiresNullTerminator); // FIXME: figure out how to include
+                                      // "llvm-c/Core.h"
+
+extern "C" LLVMBool
+LLVMParseIRInContext(LLVMContextRef ContextRef, LLVMMemoryBufferRef MemBuf,
+                     LLVMModuleRef *OutM,
+                     char **OutMessage); // FIXME: figure out how to include
+                                         // "llvm-c/Core.h"
+
 int main(int argc, char **argv) {
   LLVMContext Context;
+  LLVMContextRef ContextRef = (LLVMContextRef)&Context;
 
   // Parse the file now...
   SMDiagnostic Err;
@@ -31,6 +42,17 @@ int main(int argc, char **argv) {
   errs() << M.get()->json().dump(2) << "\n";
   if (Index.get() && Index->begin() != Index->end())
     Index->print(errs());
+
+  // LLVMModuleRef Mod = *M.get();
+  LLVMModuleRef Mod;
+  const char Data[] = "";
+  LLVMMemoryBufferRef Buf =
+      LLVMCreateMemoryBufferWithMemoryRange(Data, strlen(Data), "", 1);
+  // LLVMContextRef context_ref;
+  LLVMParseIRInContext(ContextRef, Buf, &Mod, nullptr);
+
+  printf("\nBLANK LINE\n");
+  errs() << ((Module *)Mod)->json().dump(2) << "\n";
 
   return 0;
 }
