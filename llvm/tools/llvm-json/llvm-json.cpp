@@ -4,6 +4,7 @@
 #include "llvm/IR/ModuleSummaryIndex.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/Support/SourceMgr.h"
+#include <emscripten/emscripten.h>
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <optional>
@@ -18,9 +19,17 @@ extern "C" LLVMBool
 LLVMParseIRInContext(LLVMContextRef ContextRef, LLVMMemoryBufferRef MemBuf,
                      LLVMModuleRef *OutM,
                      char **OutMessage); // FIXME: figure out how to include
-                                         // "llvm-c/Core.h"
+                                         //
 
-int main(int argc, char **argv) {
+#ifdef __cplusplus
+#define EXTERN extern "C"
+#else
+#define EXTERN
+#endif
+                                         // "llvm-c/Core.h"
+EXTERN EMSCRIPTEN_KEEPALIVE int myFunction(int a, int b) { return a + b; }
+
+/*int main(int argc, char **argv) {
   LLVMContext Context;
   LLVMContextRef ContextRef = (LLVMContextRef)&Context;
 
@@ -55,4 +64,4 @@ int main(int argc, char **argv) {
   errs() << ((Module *)Mod)->json().dump(2) << "\n";
 
   return 0;
-}
+}*/

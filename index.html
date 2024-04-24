@@ -1,0 +1,44 @@
+<!--<script type="module" src="build/bin/llvm-json.wasm"></script>
+<script src="build/bin/llvm-json.js"></script>-->
+<script>
+  const importObject = {
+    imports: {},
+  };
+  WebAssembly.instantiateStreaming(
+    fetch("build/bin/llvm-json.wasm"),
+    importObject,
+  ).then((obj) => {
+    console.log(obj.instance.exports.c);
+    console.log(obj.instance.exports.c(1, 2));
+    obj.instance.exports._myFunction(1, 2);
+  });
+
+  /*(() => {
+    console.log(Module);
+    console.log(Module._myFunction);
+    const { _myFunction } = Module;
+    console.log(_myFunction);
+    console.log(_myFunction.ccall(null, 1, 2));
+    //console.log(Module._myFunction.call(null));
+  })();
+  /*const file = "build/bin/llvm-json.wasm";
+  const importObject = {
+    imports: {},
+  };
+  WebAssembly.compileStreaming(fetch(file), importObject).then((mod) => {
+    const imports = WebAssembly.Module.imports(mod);
+    const exports = WebAssembly.Module.exports(mod);
+    console.log(imports, exports);
+  });
+
+  WebAssembly.instantiateStreaming(
+    fetch("build/bin/llvm-json.wasm"),
+    importObject,
+  ).then((results) => {
+    console.log(results);
+    console.log(
+      results.instance.ccall("Add", "number", ["number", "number"], [1, 2]),
+    );
+    console.log(results.module.ccall());
+  });*/
+</script>
