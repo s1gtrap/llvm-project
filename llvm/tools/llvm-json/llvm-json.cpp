@@ -15,19 +15,25 @@ extern "C" LLVMMemoryBufferRef LLVMCreateMemoryBufferWithMemoryRange(
     LLVMBool RequiresNullTerminator); // FIXME: figure out how to include
                                       // "llvm-c/Core.h"
 
-extern "C" LLVMBool
-LLVMParseIRInContext(LLVMContextRef ContextRef, LLVMMemoryBufferRef MemBuf,
-                     LLVMModuleRef *OutM,
-                     char **OutMessage); // FIXME: figure out how to include
-                                         //
+extern "C" LLVMBool LLVMParseIRInContext(
+    LLVMContextRef ContextRef, LLVMMemoryBufferRef MemBuf, LLVMModuleRef *OutM,
+    char **OutMessage); // FIXME: figure out how to include "llvm-c/Core.h"
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
 #else
 #define EXTERN
 #endif
-                                         // "llvm-c/Core.h"
-EXTERN EMSCRIPTEN_KEEPALIVE int myFunction(int a, int b) { return a + b; }
+
+EXTERN EMSCRIPTEN_KEEPALIVE int add(int a, int b) {
+  emscripten_log(EM_LOG_INFO, "add(%i, %i)", a, b);
+  return a + b;
+}
+
+EXTERN EMSCRIPTEN_KEEPALIVE int len(char *str) {
+  emscripten_log(EM_LOG_INFO, "len(%s)", str);
+  return strlen(str);
+}
 
 /*int main(int argc, char **argv) {
   LLVMContext Context;
