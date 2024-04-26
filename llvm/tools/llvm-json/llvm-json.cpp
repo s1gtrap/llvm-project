@@ -31,7 +31,8 @@ EXTERN EMSCRIPTEN_KEEPALIVE int add(int a, int b) {
 }
 
 EXTERN EMSCRIPTEN_KEEPALIVE int len(char *str) {
-  emscripten_log(EM_LOG_INFO, "len(%s)", str);
+  emscripten_log(EM_LOG_INFO, "len(%p)", str);
+  emscripten_log(EM_LOG_INFO, "len(\"%s\")", str);
   return strlen(str);
 }
 
