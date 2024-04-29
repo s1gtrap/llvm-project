@@ -36,6 +36,21 @@ EXTERN EMSCRIPTEN_KEEPALIVE int len(char *str) {
   return strlen(str);
 }
 
+EXTERN EMSCRIPTEN_KEEPALIVE LLVMModuleRef parse(char *Data,
+                                                LLVMModuleRef *Mod) {
+  LLVMContext Context;
+  LLVMContextRef ContextRef = (LLVMContextRef)&Context;
+  emscripten_log(EM_LOG_INFO, "parse(%p, %p)", Data, Mod);
+  emscripten_log(EM_LOG_INFO, "parse(\"%s\", %x)", Data, *Mod);
+  LLVMMemoryBufferRef Buf =
+      LLVMCreateMemoryBufferWithMemoryRange(Data, strlen(Data), "", 1);
+  // LLVMContextRef context_ref;
+  LLVMParseIRInContext(ContextRef, Buf, Mod, nullptr);
+  emscripten_log(EM_LOG_INFO, "parse(%p, %p)", Data, Mod);
+  emscripten_log(EM_LOG_INFO, "parse(\"%s\", %x)", Data, *Mod);
+  return *Mod;
+}
+
 /*int main(int argc, char **argv) {
   LLVMContext Context;
   LLVMContextRef ContextRef = (LLVMContextRef)&Context;
