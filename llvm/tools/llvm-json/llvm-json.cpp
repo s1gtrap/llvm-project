@@ -4,6 +4,7 @@
 #include "llvm/IR/ModuleSummaryIndex.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/Support/SourceMgr.h"
+#include <cstdint>
 #include <emscripten/emscripten.h>
 #include <memory>
 #include <nlohmann/json.hpp>
@@ -48,6 +49,18 @@ EXTERN EMSCRIPTEN_KEEPALIVE LLVMModuleRef parse(char *Data,
   LLVMParseIRInContext(ContextRef, Buf, Mod, nullptr);
   emscripten_log(EM_LOG_INFO, "parse(%p, %p)", Data, Mod);
   emscripten_log(EM_LOG_INFO, "parse(\"%s\", %x)", Data, *Mod);
+  emscripten_log(EM_LOG_INFO, "0 %#x", Data, *((uint8_t *)*Mod));
+  // emscripten_log(EM_LOG_INFO, "%#x", Data, *(&(((uint8_t *)*Mod)[0])));
+  int imod = (int)*Mod;
+  for (int i = 0; i < 16; i++) {
+
+    emscripten_log(EM_LOG_INFO, "Mod[%i] = %i", i, *(uint8_t *)(imod + i));
+  }
+  // emscripten_log(EM_LOG_INFO, "0 %#x", Data, ((uint8_t *)(((int)*Mod) + 0)));
+  // emscripten_log(EM_LOG_INFO, "1 %#x", Data, ((uint8_t *)(((int)*Mod) + 1)));
+  // emscripten_log(EM_LOG_INFO, "2 %#x", Data, (&(((uint8_t *)*Mod)[2])));
+  // emscripten_log(EM_LOG_INFO, "3 %#x", Data, (&(((uint8_t *)*Mod)[3])));
+  //  emscripten_log(EM_LOG_INFO, "%#x", Data, *((uint8_t *)*(Mod + 0)));
   return *Mod;
 }
 
