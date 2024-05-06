@@ -49,19 +49,28 @@ EXTERN EMSCRIPTEN_KEEPALIVE int printarray(char *Data, int len) {
 
 class Static {
 public:
-  LLVMModuleRef Mod;
-  Static() { emscripten_log(EM_LOG_INFO, "construct Static()"); }
+  LLVMModuleRef *Mod;
+  LLVMContext Context;
+  LLVMContextRef ContextRef;
+  Static() {
+    emscripten_log(EM_LOG_INFO, "construct Static()");
+
+    this->ContextRef = (LLVMContextRef)&Context;
+  }
   // NEVER CALLED ARGHH
   ~Static() { emscripten_log(EM_LOG_INFO, "destructure Static()"); }
 };
 
 EXTERN EMSCRIPTEN_KEEPALIVE Static *S = nullptr;
 
-int main(int argc, char **argv) { S = new Static(); }
+int main(int argc, char **argv) {
 
-EXTERN EMSCRIPTEN_KEEPALIVE LLVMModuleRef parse(char *Data) {
   LLVMContext Context;
   LLVMContextRef ContextRef = (LLVMContextRef)&Context;
+  S = new Static();
+}
+
+EXTERN EMSCRIPTEN_KEEPALIVE LLVMModuleRef *parse(char *Data) {
 
   emscripten_log(EM_LOG_INFO, "parse(%p)", Data);
   emscripten_log(EM_LOG_INFO, "parse(\"%s\"), *Mod = %p", Data, S->Mod);
@@ -69,7 +78,7 @@ EXTERN EMSCRIPTEN_KEEPALIVE LLVMModuleRef parse(char *Data) {
   LLVMMemoryBufferRef Buf =
       LLVMCreateMemoryBufferWithMemoryRange(Data, strlen(Data), "", 1);
   LLVMContextRef context_ref;
-  LLVMParseIRInContext(ContextRef, Buf, &S->Mod, nullptr);
+  LLVMParseIRInContext(S->ContextRef, Buf, S->Mod, nullptr);
 
   emscripten_log(EM_LOG_INFO, "parse(%p)", Data);
   emscripten_log(EM_LOG_INFO, "parse(\"%s\"), *Mod = %p", Data, S->Mod);
