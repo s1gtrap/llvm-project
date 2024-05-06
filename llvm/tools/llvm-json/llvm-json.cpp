@@ -84,7 +84,12 @@ EXTERN EMSCRIPTEN_KEEPALIVE const char *getSourceFileName() {
   return mod->getSourceFileName().c_str();
 }
 
-EXTERN EMSCRIPTEN_KEEPALIVE LLVMModuleRef *parse(char *Data) {
+EXTERN EMSCRIPTEN_KEEPALIVE const char *json() {
+  auto Mod = S->Mod;
+  return ((Module *)*Mod)->json().dump().c_str();
+}
+
+EXTERN EMSCRIPTEN_KEEPALIVE void parse(char *Data) {
 
   // emscripten_log(EM_LOG_INFO, "parse(%p)", Data);
   // emscripten_log(EM_LOG_INFO, "parse(\"%s\"), *Mod = %p", Data, S->Mod);
@@ -97,7 +102,7 @@ EXTERN EMSCRIPTEN_KEEPALIVE LLVMModuleRef *parse(char *Data) {
   // emscripten_log(EM_LOG_INFO, "parse(%p)", Data);
   // emscripten_log(EM_LOG_INFO, "parse(\"%s\"), *Mod = %p", Data, S->Mod);
 
-  return S->Mod;
+  return;
 }
 
 /*int main(int argc, char **argv) {
