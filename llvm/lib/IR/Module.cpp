@@ -75,7 +75,10 @@ Module::Module(StringRef MID, LLVMContext &C)
   Context.addModule(this);
 }
 
+#include <emscripten/emscripten.h>
+
 Module::~Module() {
+  emscripten_log(EM_LOG_INFO, "descruture %p", this);
   Context.removeModule(this);
   dropAllReferences();
   GlobalList.clear();
