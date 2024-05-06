@@ -51,33 +51,31 @@ class Static {
 public:
   LLVMModuleRef Mod;
   Static() { emscripten_log(EM_LOG_INFO, "construct Static()"); }
+  // NEVER CALLED ARGHH
   ~Static() { emscripten_log(EM_LOG_INFO, "destructure Static()"); }
 };
 
 EXTERN EMSCRIPTEN_KEEPALIVE Static *S = nullptr;
 
-EXTERN EMSCRIPTEN_KEEPALIVE std::shared_ptr<LLVMModuleRef> Mod =
-    std::make_shared<LLVMModuleRef>();
+int main(int argc, char **argv) { S = new Static(); }
 
 EXTERN EMSCRIPTEN_KEEPALIVE LLVMModuleRef parse(char *Data) {
   LLVMContext Context;
   LLVMContextRef ContextRef = (LLVMContextRef)&Context;
 
   emscripten_log(EM_LOG_INFO, "parse(%p)", Data);
-  emscripten_log(EM_LOG_INFO, "parse(\"%s\"), *Mod = %#x", Data, *Mod);
+  emscripten_log(EM_LOG_INFO, "parse(\"%s\"), *Mod = %p", Data, S->Mod);
 
   LLVMMemoryBufferRef Buf =
       LLVMCreateMemoryBufferWithMemoryRange(Data, strlen(Data), "", 1);
   LLVMContextRef context_ref;
-  LLVMParseIRInContext(ContextRef, Buf, Mod.get(), nullptr);
+  LLVMParseIRInContext(ContextRef, Buf, &S->Mod, nullptr);
 
   emscripten_log(EM_LOG_INFO, "parse(%p)", Data);
-  emscripten_log(EM_LOG_INFO, "parse(\"%s\"), *Mod = %#x", Data, *Mod);
+  emscripten_log(EM_LOG_INFO, "parse(\"%s\"), *Mod = %p", Data, S->Mod);
 
-  return *Mod;
+  return S->Mod;
 }
-
-int main(int argc, char **argv) { S = new Static(); }
 
 /*int main(int argc, char **argv) {
   LLVMContext Context;
