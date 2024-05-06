@@ -47,8 +47,17 @@ EXTERN EMSCRIPTEN_KEEPALIVE int printarray(char *Data, int len) {
   return (int)Data + len;
 }
 
-EXTERN EMSCRIPTEN_KEEPALIVE std::unique_ptr<LLVMModuleRef> Mod =
-    std::make_unique<LLVMModuleRef>();
+class Static {
+public:
+  LLVMModuleRef Mod;
+  Static() { emscripten_log(EM_LOG_INFO, "construct Static()"); }
+  ~Static() { emscripten_log(EM_LOG_INFO, "destructure Static()"); }
+};
+
+EXTERN EMSCRIPTEN_KEEPALIVE Static *S = nullptr;
+
+EXTERN EMSCRIPTEN_KEEPALIVE std::shared_ptr<LLVMModuleRef> Mod =
+    std::make_shared<LLVMModuleRef>();
 
 EXTERN EMSCRIPTEN_KEEPALIVE LLVMModuleRef parse(char *Data) {
   LLVMContext Context;
@@ -67,6 +76,8 @@ EXTERN EMSCRIPTEN_KEEPALIVE LLVMModuleRef parse(char *Data) {
 
   return *Mod;
 }
+
+int main(int argc, char **argv) { S = new Static(); }
 
 /*int main(int argc, char **argv) {
   LLVMContext Context;
