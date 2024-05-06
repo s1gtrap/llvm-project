@@ -47,21 +47,22 @@ EXTERN EMSCRIPTEN_KEEPALIVE int printarray(char *Data, int len) {
   return (int)Data + len;
 }
 
-EXTERN EMSCRIPTEN_KEEPALIVE LLVMModuleRef *Mod = nullptr;
+EXTERN EMSCRIPTEN_KEEPALIVE std::unique_ptr<LLVMModuleRef> Mod =
+    std::make_unique<LLVMModuleRef>();
 
 EXTERN EMSCRIPTEN_KEEPALIVE LLVMModuleRef parse(char *Data) {
   LLVMContext Context;
   LLVMContextRef ContextRef = (LLVMContextRef)&Context;
 
-  emscripten_log(EM_LOG_INFO, "parse(%p), Mod = %p", Data, Mod);
+  emscripten_log(EM_LOG_INFO, "parse(%p)", Data);
   emscripten_log(EM_LOG_INFO, "parse(\"%s\"), *Mod = %#x", Data, *Mod);
 
   LLVMMemoryBufferRef Buf =
       LLVMCreateMemoryBufferWithMemoryRange(Data, strlen(Data), "", 1);
   LLVMContextRef context_ref;
-  LLVMParseIRInContext(ContextRef, Buf, Mod, nullptr);
+  LLVMParseIRInContext(ContextRef, Buf, Mod.get(), nullptr);
 
-  emscripten_log(EM_LOG_INFO, "parse(%p), Mod = %p", Data, Mod);
+  emscripten_log(EM_LOG_INFO, "parse(%p)", Data);
   emscripten_log(EM_LOG_INFO, "parse(\"%s\"), *Mod = %#x", Data, *Mod);
 
   return *Mod;
