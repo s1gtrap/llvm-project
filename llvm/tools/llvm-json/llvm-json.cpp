@@ -54,7 +54,7 @@ EXTERN EMSCRIPTEN_KEEPALIVE LLVMModuleRef parse(char *Data) {
   LLVMContextRef ContextRef = (LLVMContextRef)&Context;
 
   emscripten_log(EM_LOG_INFO, "parse(%p), Mod = %p", Data, Mod);
-  emscripten_log(EM_LOG_INFO, "parse(\"%s\")", Data);
+  emscripten_log(EM_LOG_INFO, "parse(\"%s\"), *Mod = %#x", Data, *Mod);
 
   LLVMMemoryBufferRef Buf =
       LLVMCreateMemoryBufferWithMemoryRange(Data, strlen(Data), "", 1);
@@ -62,24 +62,8 @@ EXTERN EMSCRIPTEN_KEEPALIVE LLVMModuleRef parse(char *Data) {
   LLVMParseIRInContext(ContextRef, Buf, Mod, nullptr);
 
   emscripten_log(EM_LOG_INFO, "parse(%p), Mod = %p", Data, Mod);
-  emscripten_log(EM_LOG_INFO, "parse(\"%s\"), *Mod = %x", Data, *Mod);
+  emscripten_log(EM_LOG_INFO, "parse(\"%s\"), *Mod = %#x", Data, *Mod);
 
-  /*auto ptr = (uint8_t *)*Mod;
-  for (int i = 0; i < 16; i++) {
-
-    emscripten_log(EM_LOG_INFO, "Ptr[%i] = %i", i, *(uint8_t *)(ptr + i));
-  }
-  imod = (int)*Mod;
-  for (int i = 0; i < 16; i++) {
-
-    emscripten_log(EM_LOG_INFO, "Mod[%i] = %i", i, *(uint8_t *)(imod + i));
-  }*/
-  //*((char *)*Mod) = 69;
-  // emscripten_log(EM_LOG_INFO, "0 %#x", Data, ((uint8_t *)(((int)*Mod) + 0)));
-  // emscripten_log(EM_LOG_INFO, "1 %#x", Data, ((uint8_t *)(((int)*Mod) + 1)));
-  // emscripten_log(EM_LOG_INFO, "2 %#x", Data, (&(((uint8_t *)*Mod)[2])));
-  // emscripten_log(EM_LOG_INFO, "3 %#x", Data, (&(((uint8_t *)*Mod)[3])));
-  //  emscripten_log(EM_LOG_INFO, "%#x", Data, *((uint8_t *)*(Mod + 0)));
   return *Mod;
 }
 
