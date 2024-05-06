@@ -70,18 +70,32 @@ int main(int argc, char **argv) {
   S = new Static();
 }
 
+EXTERN EMSCRIPTEN_KEEPALIVE char *string() { return "Hello world!"; }
+
+EXTERN EMSCRIPTEN_KEEPALIVE const char *getModuleIdentifier() {
+  // LLVMGetModuleIdentifier();
+  Module *mod = (Module *)*S->Mod;
+  return mod->getModuleIdentifier().c_str();
+}
+
+EXTERN EMSCRIPTEN_KEEPALIVE const char *getSourceFileName() {
+  // LLVMGetModuleIdentifier();
+  Module *mod = (Module *)*S->Mod;
+  return mod->getSourceFileName().c_str();
+}
+
 EXTERN EMSCRIPTEN_KEEPALIVE LLVMModuleRef *parse(char *Data) {
 
-  emscripten_log(EM_LOG_INFO, "parse(%p)", Data);
-  emscripten_log(EM_LOG_INFO, "parse(\"%s\"), *Mod = %p", Data, S->Mod);
+  // emscripten_log(EM_LOG_INFO, "parse(%p)", Data);
+  // emscripten_log(EM_LOG_INFO, "parse(\"%s\"), *Mod = %p", Data, S->Mod);
 
   LLVMMemoryBufferRef Buf =
       LLVMCreateMemoryBufferWithMemoryRange(Data, strlen(Data), "", 1);
   LLVMContextRef context_ref;
   LLVMParseIRInContext(S->ContextRef, Buf, S->Mod, nullptr);
 
-  emscripten_log(EM_LOG_INFO, "parse(%p)", Data);
-  emscripten_log(EM_LOG_INFO, "parse(\"%s\"), *Mod = %p", Data, S->Mod);
+  // emscripten_log(EM_LOG_INFO, "parse(%p)", Data);
+  // emscripten_log(EM_LOG_INFO, "parse(\"%s\"), *Mod = %p", Data, S->Mod);
 
   return S->Mod;
 }
