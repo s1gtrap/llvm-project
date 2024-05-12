@@ -3908,12 +3908,9 @@ bool LLParser::parseValID(ValID &ID, PerFunctionState *PFS, Type *ExpectedTy) {
     Lex.Lex();
     if (Opc == Instruction::Add || Opc == Instruction::Sub ||
         Opc == Instruction::Mul || Opc == Instruction::Shl) {
-      if (EatIfPresent(lltok::kw_nuw))
-        NUW = true;
+      EatIfPresent(lltok::kw_nuw);
       if (EatIfPresent(lltok::kw_nsw)) {
-        NSW = true;
-        if (EatIfPresent(lltok::kw_nuw))
-          NUW = true;
+        EatIfPresent(lltok::kw_nuw);
       }
     } else if (Opc == Instruction::SDiv || Opc == Instruction::UDiv ||
                Opc == Instruction::LShr || Opc == Instruction::AShr) {
