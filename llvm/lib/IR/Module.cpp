@@ -884,6 +884,7 @@ nlohmann::json toJson(GlobalValue &Value) {
   Obj["ValueType"] = toJson(*Value.getValueType());
   Obj["ThreadLocalMode"] = Value.getThreadLocalMode(); // TODO
   Obj["AddressSpace"] = Value.getAddressSpace();
+  Obj["GlobalIdentifier"] = Value.getGlobalIdentifier();
   // TODO: remaining fields
   return Obj;
 }
