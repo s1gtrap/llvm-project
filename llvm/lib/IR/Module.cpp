@@ -908,15 +908,13 @@ nlohmann::json toJson(BasicBlock &Block, int &FuncCtr) {
     Obj["Name"] = Block.getName().data();
   } else {
     Obj["Name"] = FuncCtr;
-    FuncCtr += 1;
+    // FuncCtr += 1;
   };
   Obj["Instructions"] = nlohmann::json::array();
   for (auto Inst = Block.begin(); Inst != Block.end(); Inst++) {
     Obj["Instructions"].push_back(toJson(*Inst, FuncCtr));
-    FuncCtr += 1;
   }
   Obj["Terminator"] = toJson(*Block.getTerminator(), FuncCtr); //
-  FuncCtr += 1;
   return Obj;
 }
 
@@ -928,7 +926,18 @@ nlohmann::json toJson(Instruction &Term, int &FuncCtr) {
   for (unsigned int i = 0; i < Term.getNumOperands(); i++) {
     Obj["Operands"].push_back(toJson(*Term.getOperandList()[i].get()));
   }
-  FuncCtr += 1;
+  Obj["Name"] = Term.getName();
+  Obj["ValueName"] = (dynamic_cast<Value &>(Term)).getName();
+  Obj["HasValueName"] = (dynamic_cast<Value &>(Term)).hasName();
+  Obj["Type"] = toJson(*Term.getType());
+  auto t = Term.getType();
+  std::string s = "";
+  llvm::raw_string_ostream os(s);
+  t->print(os);
+  Obj["TypeName"] = os.str();
+  if (!Term.getType()->isVoidTy() || Term.hasName()) {
+    FuncCtr += 1;
+  }
   return Obj;
 }
 
