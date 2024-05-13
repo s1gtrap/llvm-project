@@ -900,12 +900,6 @@ nlohmann::json toJson(GlobalVariable &Global) {
   return Obj;
 }
 
-// nlohmann::json toJson(BasicBlock &BasicBlock) {
-//   auto Obj = nlohmann::json::object();
-//
-//   return Obj;
-// }
-
 nlohmann::json toJson(Instruction &Term, int &FuncCtr);
 
 nlohmann::json toJson(BasicBlock &Block, int &FuncCtr) {
@@ -942,10 +936,12 @@ nlohmann::json toJson(Function &Function) {
   nlohmann::json::object_t Obj = toJson((GlobalValue &)Function);
   Obj["BasicBlock"] = nlohmann::json::array();
 
+  int FuncCtr = 0;
+
   for (Function::BasicBlockListType::iterator first =
            Function.getBasicBlockList().begin();
        first != Function.getBasicBlockList().end(); first++) {
-    Obj["BasicBlock"].push_back(toJson(*first));
+    Obj["BasicBlock"].push_back(toJson(*first, FuncCtr));
   }
 
   return Obj;
