@@ -908,13 +908,14 @@ nlohmann::json toJson(BasicBlock &Block, int &FuncCtr) {
     Obj["Name"] = Block.getName().data();
   } else {
     Obj["Name"] = FuncCtr;
-    // FuncCtr += 1;
+    FuncCtr += 1;
   };
   Obj["Instructions"] = nlohmann::json::array();
   for (auto Inst = Block.begin(); Inst != Block.end(); Inst++) {
     Obj["Instructions"].push_back(toJson(*Inst, FuncCtr));
   }
-  Obj["Terminator"] = toJson(*Block.getTerminator(), FuncCtr); //
+  Obj["Terminator"] = toJson(*Block.getTerminator(), FuncCtr);
+
   return Obj;
 }
 
@@ -926,18 +927,18 @@ nlohmann::json toJson(Instruction &Term, int &FuncCtr) {
   for (unsigned int i = 0; i < Term.getNumOperands(); i++) {
     Obj["Operands"].push_back(toJson(*Term.getOperandList()[i].get()));
   }
-  Obj["Name"] = Term.getName();
-  Obj["ValueName"] = (dynamic_cast<Value &>(Term)).getName();
-  Obj["HasValueName"] = (dynamic_cast<Value &>(Term)).hasName();
   Obj["Type"] = toJson(*Term.getType());
-  auto t = Term.getType();
-  std::string s = "";
-  llvm::raw_string_ostream os(s);
-  t->print(os);
-  Obj["TypeName"] = os.str();
+  Obj["Offset"] = FuncCtr;
+
   if (!Term.getType()->isVoidTy() || Term.hasName()) {
+    if (!Term.getType()->isVoidTy()) {
+      Obj["Name"] = FuncCtr;
+    } else {
+      Obj["Name"] = Term.getName();
+    }
     FuncCtr += 1;
   }
+
   return Obj;
 }
 
@@ -970,6 +971,12 @@ nlohmann::json toJson(Type &Type) {
   auto Obj = nlohmann::json::object();
   Obj["ID"] = Type.getTypeID();
   Obj["Subtypes"] = nlohmann::json::array();
+
+  std::string s = "";
+  llvm::raw_string_ostream os(s);
+  Type.print(os);
+  Obj["Name"] = os.str();
+
   // Obj["SubtypesLength"] = Type.subtypes().size(); // FIXME: what is this?
   for (auto Subtype = Type.subtype_begin(); Subtype != Type.subtype_end();
        Subtype++) {
