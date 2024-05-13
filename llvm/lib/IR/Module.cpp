@@ -877,6 +877,8 @@ nlohmann::json toJson(Type &Type);
 
 nlohmann::json toJson(Value &Value);
 
+nlohmann::json toJson(Argument &Arg, int &FuncCtr);
+
 nlohmann::json toJson(GlobalValue &Value) {
   nlohmann::json::object_t Obj = nlohmann::json::object();
   Obj["Linkage"] = Value.getLinkage();
@@ -921,8 +923,10 @@ nlohmann::json toJson(BasicBlock &Block, int &FuncCtr) {
 
 nlohmann::json toJson(Instruction &Term, int &FuncCtr) {
   nlohmann::json::object_t Obj = nlohmann::json::object();
+
   Obj["Opcode"] = Term.getOpcode();
   Obj["OpcodeName"] = Term.getOpcodeName();
+
   Obj["Operands"] = nlohmann::json::array();
   for (unsigned int i = 0; i < Term.getNumOperands(); i++) {
     Obj["Operands"].push_back(toJson(*Term.getOperandList()[i].get()));
@@ -942,12 +946,32 @@ nlohmann::json toJson(Instruction &Term, int &FuncCtr) {
   return Obj;
 }
 
+nlohmann::json toJson(Argument &Arg, int &FuncCtr) {
+  nlohmann::json::object_t Obj = nlohmann::json::object();
+
+  if (Arg.hasName()) {
+    Obj["Name"] = Arg.getName();
+  } else {
+
+    Obj["Name"] = FuncCtr;
+    FuncCtr += 1;
+  }
+  Obj["Type"] = toJson(*Arg.getType());
+
+  return Obj;
+}
+
 nlohmann::json toJson(Function &Function) {
   nlohmann::json::object_t Obj = toJson((GlobalValue &)Function);
-  Obj["BasicBlock"] = nlohmann::json::array();
 
   int FuncCtr = 0;
 
+  Obj["Params"] = nlohmann::json::array();
+  for (auto Arg = Function.arg_begin(); Arg != Function.arg_end(); Arg++) {
+    Obj["Params"].push_back(toJson(*Arg, FuncCtr));
+  }
+
+  Obj["BasicBlock"] = nlohmann::json::array();
   for (Function::BasicBlockListType::iterator first =
            Function.getBasicBlockList().begin();
        first != Function.getBasicBlockList().end(); first++) {
