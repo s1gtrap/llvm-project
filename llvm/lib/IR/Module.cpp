@@ -18,6 +18,7 @@
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/Twine.h"
 #include "llvm/IR/Attributes.h"
+#include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Comdat.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DataLayout.h"
@@ -897,10 +898,22 @@ nlohmann::json toJson(GlobalVariable &Global) {
   return Obj;
 }
 
+nlohmann::json toJson(BasicBlock &BasicBlock) {
+  auto Obj = nlohmann::json::object();
+
+  return Obj;
+}
+
 nlohmann::json toJson(Function &Function) {
   nlohmann::json::object_t Obj = toJson((GlobalValue &)Function);
-  Obj["BasicBlock"] = symbolTableToJson(
-      Function.getBasicBlockList()); // FIXME: use iterator/successors instead
+  Obj["BasicBlock"] = nlohmann::json::array();
+
+  for (Function::BasicBlockListType::iterator first =
+           Function.getBasicBlockList().begin();
+       first != Function.getBasicBlockList().end(); first++) {
+    Obj["BasicBlock"].push_back(toJson(*first));
+  }
+
   return Obj;
 }
 
@@ -946,8 +959,14 @@ nlohmann::json toJson(Instruction &Term) {
   return Obj;
 }
 
-nlohmann::json toJson(BasicBlock &Block) {
+nlohmann::json toJson(BasicBlock &Block, int &FuncCtr) {
   nlohmann::json::object_t Obj = nlohmann::json::object();
+  if (Block.hasName()) {
+    Obj["Name"] = Block.getName().data();
+  } else {
+    Obj["Name"] = FuncCtr;
+    FuncCtr += 1;
+  };
   Obj["Instructions"] = nlohmann::json::array();
   for (auto Inst = Block.begin(); Inst != Block.end(); Inst++) {
     Obj["Instructions"].push_back(toJson(*Inst));
@@ -970,10 +989,15 @@ nlohmann::json symbolTableToJson(SymbolTableList<T> &List) {
 nlohmann::json Module::json() {
   nlohmann::json Mod = nlohmann::json::object();
 
+  Mod["Name"] = this->getModuleIdentifier().c_str();
+  Mod["SourceFileName"] = this->getSourceFileName();
+  // Mod["DataLayout"] = // TODO
+  Mod["TargetTriple"] = this->getTargetTriple();
   Mod["GlobalList"] = symbolTableToJson(this->GlobalList);
   Mod["FunctionList"] = symbolTableToJson(this->FunctionList);
   Mod["AliasList"] = symbolTableToJson(this->AliasList);
   Mod["IFuncList"] = symbolTableToJson(this->IFuncList);
+  // Mod["InlineAsm"] = // TODO
 
   return Mod;
 }
