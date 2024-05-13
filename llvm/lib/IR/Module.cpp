@@ -875,6 +875,8 @@ void Module::setDarwinTargetVariantSDKVersion(VersionTuple Version) {
 
 nlohmann::json toJson(Type &Type);
 
+nlohmann::json toJson(Value &Value);
+
 nlohmann::json toJson(GlobalValue &Value) {
   nlohmann::json::object_t Obj = nlohmann::json::object();
   Obj["Linkage"] = Value.getLinkage();
@@ -898,9 +900,41 @@ nlohmann::json toJson(GlobalVariable &Global) {
   return Obj;
 }
 
-nlohmann::json toJson(BasicBlock &BasicBlock) {
-  auto Obj = nlohmann::json::object();
+// nlohmann::json toJson(BasicBlock &BasicBlock) {
+//   auto Obj = nlohmann::json::object();
+//
+//   return Obj;
+// }
 
+nlohmann::json toJson(Instruction &Term, int &FuncCtr);
+
+nlohmann::json toJson(BasicBlock &Block, int &FuncCtr) {
+  nlohmann::json::object_t Obj = nlohmann::json::object();
+  if (Block.hasName()) {
+    Obj["Name"] = Block.getName().data();
+  } else {
+    Obj["Name"] = FuncCtr;
+    FuncCtr += 1;
+  };
+  Obj["Instructions"] = nlohmann::json::array();
+  for (auto Inst = Block.begin(); Inst != Block.end(); Inst++) {
+    Obj["Instructions"].push_back(toJson(*Inst, FuncCtr));
+    FuncCtr += 1;
+  }
+  Obj["Terminator"] = toJson(*Block.getTerminator(), FuncCtr); //
+  FuncCtr += 1;
+  return Obj;
+}
+
+nlohmann::json toJson(Instruction &Term, int &FuncCtr) {
+  nlohmann::json::object_t Obj = nlohmann::json::object();
+  Obj["Opcode"] = Term.getOpcode();
+  Obj["OpcodeName"] = Term.getOpcodeName();
+  Obj["Operands"] = nlohmann::json::array();
+  for (unsigned int i = 0; i < Term.getNumOperands(); i++) {
+    Obj["Operands"].push_back(toJson(*Term.getOperandList()[i].get()));
+  }
+  FuncCtr += 1;
   return Obj;
 }
 
@@ -945,33 +979,6 @@ nlohmann::json toJson(Type &Type) {
 nlohmann::json toJson(Value &Value) {
   auto Obj = nlohmann::json::object();
   Obj["Type"] = toJson(*Value.getType());
-  return Obj;
-}
-
-nlohmann::json toJson(Instruction &Term) {
-  nlohmann::json::object_t Obj = nlohmann::json::object();
-  Obj["Opcode"] = Term.getOpcode();
-  Obj["OpcodeName"] = Term.getOpcodeName();
-  Obj["Operands"] = nlohmann::json::array();
-  for (unsigned int i = 0; i < Term.getNumOperands(); i++) {
-    Obj["Operands"].push_back(toJson(*Term.getOperandList()[i].get()));
-  }
-  return Obj;
-}
-
-nlohmann::json toJson(BasicBlock &Block, int &FuncCtr) {
-  nlohmann::json::object_t Obj = nlohmann::json::object();
-  if (Block.hasName()) {
-    Obj["Name"] = Block.getName().data();
-  } else {
-    Obj["Name"] = FuncCtr;
-    FuncCtr += 1;
-  };
-  Obj["Instructions"] = nlohmann::json::array();
-  for (auto Inst = Block.begin(); Inst != Block.end(); Inst++) {
-    Obj["Instructions"].push_back(toJson(*Inst));
-  }
-  Obj["Terminator"] = toJson(*Block.getTerminator()); //
   return Obj;
 }
 
