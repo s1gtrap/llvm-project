@@ -924,6 +924,11 @@ nlohmann::json toJson(BasicBlock &Block, int &FuncCtr) {
   return Obj;
 }
 
+nlohmann::json toJson(Use &Use) {
+  nlohmann::json::object_t Obj = toJson((Value &)Use);
+  return Obj;
+}
+
 nlohmann::json toJson(Instruction &Term, int &FuncCtr) {
   nlohmann::json::object_t Obj = nlohmann::json::object();
 
@@ -1026,6 +1031,12 @@ nlohmann::json toJson(Type &Type) {
 nlohmann::json toJson(Value &Value) {
   auto Obj = nlohmann::json::object();
   Obj["Type"] = toJson(*Value.getType());
+
+  std::string s = "";
+  llvm::raw_string_ostream os(s);
+  Value.print(os);
+  Obj["ValueName"] = os.str();
+
   return Obj;
 }
 
