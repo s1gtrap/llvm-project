@@ -1,6 +1,6 @@
 add_subdirectory(nlohmann_json)
 
-set(LLVM_LINK_COMPONENTS AsmParser Core IRReader Support)
+set(LLVM_LINK_COMPONENTS AsmParser CodeGen Core IRReader Support)
 
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -sTOTAL_MEMORY=2048MB -sEXPORTED_FUNCTIONS=_parse -sASSERTIONS=1")
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -sTOTAL_MEMORY=2048MB -sEXPORTED_FUNCTIONS=_parse -sASSERTIONS=1")

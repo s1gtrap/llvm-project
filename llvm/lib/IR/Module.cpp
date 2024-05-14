@@ -33,6 +33,7 @@
 #include "llvm/IR/InstrTypes.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Metadata.h"
+#include "llvm/IR/ModuleSlotTracker.h"
 #include "llvm/IR/ModuleSummaryIndex.h"
 #include "llvm/IR/SymbolTableListTraits.h"
 #include "llvm/IR/Type.h"
@@ -943,6 +944,7 @@ nlohmann::json toJson(Instruction &Term, int &FuncCtr) {
     BasicBlock *BB = Inst->getParent();
     Function *Func = BB->getParent();
     Module *Mod = Func->getParent();
+    ModuleSlotTracker MST(Mod);
 
     Value *Val = Use.get();
     nlohmann::json::object_t El = toJson(*Val);
