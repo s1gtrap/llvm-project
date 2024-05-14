@@ -956,17 +956,14 @@ nlohmann::json toJson(Instruction &Term, int &FuncCtr) {
       El["Name"] = MST.getLocalSlot(Use);
     }
 
-    std::string s = "";
-    llvm::raw_string_ostream os(s);
-    User->print(os);
-    El["User"] = os.str();
-
-    El["El"] = El;
+    // std::string s = "";
+    // llvm::raw_string_ostream os(s);
+    // User->print(os);
+    // El["User"] = os.str();
 
     Obj["Operands"].push_back(El);
   }
   Obj["Type"] = toJson(*Term.getType());
-  Obj["Offset"] = FuncCtr;
 
   if (!Term.getType()->isVoidTy() || Term.hasName()) {
     if (!Term.getType()->isVoidTy()) {
@@ -1057,6 +1054,17 @@ nlohmann::json toJson(Type &Type) {
 nlohmann::json toJson(Value &Value) {
   auto Obj = nlohmann::json::object();
   Obj["Type"] = toJson(*Value.getType());
+
+  if (Constant *C = dyn_cast<Constant>(&Value)) {
+    // TypePrinting TypePrinter;
+    // TypePrinter.print(C->getType(), OS);
+    // OS << ' ';
+    // AsmWriterContext WriterCtx(&TypePrinter, MST.getMachine());
+    // WriteConstantInternal(OS, C, WriterCtx);
+    Obj["Constant"] = true;
+  } else {
+    Obj["Constant"] = false;
+  }
 
   std::string s = "";
   llvm::raw_string_ostream os(s);
