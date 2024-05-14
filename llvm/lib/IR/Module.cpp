@@ -950,10 +950,18 @@ nlohmann::json toJson(Instruction &Term, int &FuncCtr) {
     Value *Val = Use.get();
     nlohmann::json::object_t El = toJson(*Val);
 
+    if (Use->hasName()) {
+      El["Name"] = Use->getName();
+    } else if (!Use->getType()->isVoidTy()) {
+      El["Name"] = MST.getLocalSlot(Use);
+    }
+
     std::string s = "";
     llvm::raw_string_ostream os(s);
     User->print(os);
     El["User"] = os.str();
+
+    El["El"] = El;
 
     Obj["Operands"].push_back(El);
   }
