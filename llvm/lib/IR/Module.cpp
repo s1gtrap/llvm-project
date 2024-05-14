@@ -940,6 +940,10 @@ nlohmann::json toJson(Instruction &Term, int &FuncCtr) {
     Use &Use = Term.getOperandList()[i];
     User *User = Use.getUser();
     Instruction *Inst = (Instruction *)User;
+    BasicBlock *BB = Inst->getParent();
+    Function *Func = BB->getParent();
+    Module *Mod = Func->getParent();
+
     Value *Val = Use.get();
     nlohmann::json::object_t El = toJson(*Val);
 
