@@ -30,6 +30,7 @@
 #include "llvm/IR/GlobalIFunc.h"
 #include "llvm/IR/GlobalValue.h"
 #include "llvm/IR/GlobalVariable.h"
+#include "llvm/IR/InstrTypes.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Metadata.h"
 #include "llvm/IR/ModuleSummaryIndex.h"
@@ -877,6 +878,8 @@ nlohmann::json toJson(Type &Type);
 
 nlohmann::json toJson(Value &Value);
 
+nlohmann::json toJson(Use &Use);
+
 nlohmann::json toJson(Argument &Arg, int &FuncCtr);
 
 nlohmann::json toJson(GlobalValue &Value) {
@@ -943,6 +946,14 @@ nlohmann::json toJson(Instruction &Term, int &FuncCtr) {
     FuncCtr += 1;
   }
 
+  return Obj;
+}
+
+nlohmann::json toJson(BinaryOperator &Inst,
+                      int &FuncCtr) { // FIXME: does nothing
+  nlohmann::json::object_t Obj =
+      toJson(dynamic_cast<BinaryOperator &>(Inst), FuncCtr);
+  // Obj["Operands"] = nlohmann::json::array();
   return Obj;
 }
 
