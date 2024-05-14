@@ -945,6 +945,7 @@ nlohmann::json toJson(Instruction &Term, int &FuncCtr) {
     Function *Func = BB->getParent();
     Module *Mod = Func->getParent();
     ModuleSlotTracker MST(Mod);
+    MST.incorporateFunction(*Func);
 
     Value *Val = Use.get();
     nlohmann::json::object_t El = toJson(*Val);
