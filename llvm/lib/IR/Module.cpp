@@ -940,8 +940,14 @@ nlohmann::json toJson(Instruction &Term, int &FuncCtr) {
     Use &Use = Term.getOperandList()[i];
     User *User = Use.getUser();
     Value *Val = Use.get();
-    nlohmann::json::object_t Obj = toJson(*Val);
-    Obj["Operands"].push_back(Obj);
+    nlohmann::json::object_t El = toJson(*Val);
+
+    std::string s = "";
+    llvm::raw_string_ostream os(s);
+    User->print(os);
+    El["User"] = os.str();
+
+    Obj["Operands"].push_back(El);
   }
   Obj["Type"] = toJson(*Term.getType());
   Obj["Offset"] = FuncCtr;
