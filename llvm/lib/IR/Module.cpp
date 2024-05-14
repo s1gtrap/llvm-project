@@ -937,7 +937,8 @@ nlohmann::json toJson(Instruction &Term, int &FuncCtr) {
 
   Obj["Operands"] = nlohmann::json::array();
   for (unsigned int i = 0; i < Term.getNumOperands(); i++) {
-    Obj["Operands"].push_back(toJson(*Term.getOperandList()[i].get()));
+    Value *Val = Term.getOperandList()[i].get();
+    Obj["Operands"].push_back(toJson(*Val));
   }
   Obj["Type"] = toJson(*Term.getType());
   Obj["Offset"] = FuncCtr;
